@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes Do Pedido</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #eee;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      margin: 20px;
+    }
+
+    .box {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .merchant img {
+      max-width: 100px;
+      border-radius: 8px;
+    }
+
+    .invoice table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .invoice th,
+    .invoice td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .right-align {
+      text-align: right;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .button {
+      margin-top: 20px;
+    }
+
+    .back-btn {
+      background-color: #2963a2;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: none;
+    }
+    .logo-img{
+      display: flex;
+    }
+    .order-number{
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <p class="help" style="color:#757373;">
+      Detalhes Do Pedido
+    </p>
+    <div class="box card-panel z-depth-3">
+      <div class="merchant">
+        <div class="logo-img">
+          <img src="https://cdn-icons-png.flaticon.com/512/4479/4479138.png" alt="Merchant Image" style="width: 50px; height: 47px;">
+          <h5 class="center-align" style="
+          font-size: 17px;
+          margin-top: 15px;
+          margin-left: 10px;
+         ">Lanche On Net</h5>
+        </div>
+        <p id="order-number" class="order-number"></p>
+      </div>
+      <div class="invoice">
+        <table class="highlight">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantidade</th>
+              <th>Preço Unidade</th>
+              <th class="right-align">Total</th>
+            </tr>
+          </thead>
+          <tbody id="order-details-body">
+            <!-- Order details will be dynamically added here -->
+          </tbody>
+        </table>
+        <div id="total" class="right-align bold"></div>
+      </div>
+      <div class="button checkout row">
+        <button class="col s12 btn-large green btn waves-effect waves-dark back-btn" onclick="goToHome()">
+          <span>Voltar para inicio</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      $.ajax({
+        url: 'http://localhost:4000/pedidos',
+        method: 'GET',
+        success: function (data) {
+          if (data.length > 0 && data[0].numeroPedido) {
+            $('#order-number').text(`Numero Pedido: ${data[0].numeroPedido}`);
+            const orderDetailsBody = $('#order-details-body');
+            data[0].carrinho.forEach(item => {
+              const total = (item.preco * item.quantity) / 100;
+              const precoUnitario = item.preco / 100;
+
+              // Include the image source within the loop
+              const rowHtml = `
+                <tr>
+                  <td>
+                    <img src="${item.imagem}" alt="${item.nome}" style="max-width: 50px; border-radius: 4px;">
+                    ${item.nome}
+                  </td>
+                  <td>${item.quantity}</td>
+                  <td>R$ ${precoUnitario.toFixed(2)}</td>
+                  <td class="right-align">R$ ${total.toFixed(2)}</td>
+                </tr>
+              `;
+              orderDetailsBody.append(rowHtml);
+            });
+
+            const totalPedido = data[0].carrinho.reduce((total, item) => total + (item.preco * item.quantity) / 100, 0);
+            $('#total').text(`Total: R$ ${totalPedido.toFixed(2)}`);
+          }
+        },
+        error: function (error) {
+          console.error('Error fetching data:', error);
+        }
+      });
+    });
+
+    function goToHome() {
+      window.location.href = ' http://localhost:5174/';
+    }
+  </script>
+</body>
+
+</html>
